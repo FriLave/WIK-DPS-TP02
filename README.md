@@ -26,3 +26,9 @@ Une fois l'image créée vous pouvez découvrir les différents arguments dispon
 * Vous devez modifier la variable d'environnement `PORT` pour lancer le conteneur de l'application web avec le port **1337** à l'écoute.
 
 * Vous devez modifier le hostname de votre conteneur pour le faire correspondre à : **mydocker**.
+
+# Lancement
+```sh
+docker build -t wik-dps-02 .
+docker run -it --rm -h mydocker -e PORT=1337 -p 1337:1337 wik-dps-02 
+```
