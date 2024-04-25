@@ -1,0 +1,56 @@
+services:
+  app:
+    hostname: mydocker
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    ports:
+      - "3000:1337"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      - PORT=1337
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - MYSQL_HOST=mysql
+      - MYSQL_PORT=3306
+      - MYSQL_DB=nodeapp
+      - MYSQL_USER=nodeapp
+      - MYSQL_PASSWORD=nodeapp
+      - FILE_PATH_TO_CHECK=./dummy.txt
+
+  # MySQL
+  mysql:
+    image: bitnami/mysql:8.3
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: nodeapp
+      MYSQL_USER: nodeapp
+      MYSQL_PASSWORD: nodeapp
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis
+  redis:
+    image: bitnami/redis:7.0
+    ports:
+      - "6379:6379"
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+
+volumes:
+  mysql: {}

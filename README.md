@@ -6,16 +6,43 @@ Il vous faut **NodeJS 20**.
 
 ```
 npm i
-node index.js
+npm run start
 ```
 
-## Créer un Dockerfile pour cette application NodeJS
+ou pour développer avec hot reload :
 
-Il s'agit d'une application web basique réalisée en NodeJS avec Express.
+```
+npm run develop
+```
+
+L'application web possède une unique route `\` qui retourne un JSON avec des résultats de tests.
+
+## Variables d'environnement 
+
+* **PORT** Port d'écoute de l'application web
+* **REDIS_HOST** Host de la base de données Redis
+* **REDIS_PORT** Port de la base de donnée Redis
+* **MYSQL_HOST** Host de la base de données MySQL
+* **MYSQL_PORT** Port de la base de données MySQL
+* **MYSQL_DB** Nom de la base de données MySQL
+* **MYSQL_USER** Nom d'utilisateur pour la base de données MySQL
+* **MYSQL_PASSWORD** Mot de passe de l'utilisateur pour la base de données MySQL
+* **FILE_PATH_TO_CHECK** Chemin du fichier dont la présence est à contrôler
+
+## Créer un Dockerfile pour cette application Typescript
+
+Il s'agit d'une application web basique réalisée en Typescript avec Express.
 
 * Vous devez **créer le Dockerfile** et **build l'image** pour lancer cette application.
 
 Vous devez optimiser votre image pour que l'étape d'installation des dépendances soit supprimée du cache **seulement si** vous modifiez le contenu du fichier `package.json` ou `package-lock.json`.
+
+L'image doit comporter **trois** stages :
+* build
+* development
+* production
+
+L'image doit être la plus petite possible en taille pour le stage de production.
 
 ## Configuration du container
 
@@ -27,8 +54,13 @@ Une fois l'image créée vous pouvez découvrir les différents arguments dispon
 
 * Vous devez modifier le hostname de votre conteneur pour le faire correspondre à : **mydocker**.
 
-# Lancement
-```sh
-docker build -t wik-dps-02 .
-docker run -it --rm -h mydocker -e PORT=1337 -p 1337:1337 wik-dps-02 
-```
+## Création d'un docker compose
+
+Il faut pouvoir faire passer toutes les propriétés à **OK**, pour cela il faut utiliser docker compose pour lancer :
+* Une base de données MySQL
+* Une base de données Redis
+* L'application web
+
+Il faut aussi **faire en sorte que le hot reload fonctionne pour l'application web avec docker compose**.
+
+Il faut utiliser un volume pour les données de la base MySQL.
