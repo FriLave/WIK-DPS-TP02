@@ -1,0 +1,74 @@
+services:
+  # Nginx
+  proxy:
+    image: bitnami/nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/opt/bitnami/nginx/conf/server_blocks/wordpress.conf:ro
+    networks:
+      - frontend
+    depends_on:
+      - wordpress
+      - mariadb
+      - redis
+
+  # WordPress
+  wordpress:
+    image: bitnami/wordpress:6
+    deploy:
+      replicas: 2
+      mode: replicated
+    environment:
+      WORDPRESS_USERNAME: ${WORDPRESS_USERNAME}
+      WORDPRESS_PASSWORD: ${WORDPRESS_PASSWORD}
+      WORDPRESS_PLUGINS: ${WORDPRESS_PLUGINS}
+      WORDPRESS_EXTRA_WP_CONFIG_CONTENT: |
+        /* redis-cache config */
+        define('WP_REDIS_HOST', '${WORDPRESS_REDIS_HOST}');
+        define('WP_REDIS_PORT', '${REDIS_PORT}');
+        define('WP_REDIS_PASSWORD', '${REDIS_PASSWORD}');
+      # Database variables
+      WORDPRESS_DATABASE_HOST: ${WORDPRESS_MARIADB_HOST}
+      WORDPRESS_DATABASE_NAME: ${MARIADB_DATABASE}
+      WORDPRESS_DATABASE_USER: ${MARIADB_USER}
+      WORDPRESS_DATABASE_PASSWORD: ${MARIADB_PASSWORD}
+    volumes:
+      - wordpress-data:/bitnami/wordpress
+      - ./init-scripts:/docker-entrypoint-init.d
+    networks:
+      - frontend
+      - backend
+    depends_on:
+      - mariadb
+      - redis
+
+  # MariaDB
+  mariadb:
+    image: bitnami/mariadb
+    environment:
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
+      MARIADB_DATABASE: ${MARIADB_DATABASE}
+      MARIADB_USER: ${MARIADB_USER}
+      MARIADB_PASSWORD: ${MARIADB_PASSWORD}
+    volumes:
+      - database-data:/bitnami/mariadb
+    networks:
+      - backend
+
+  # Redis
+  redis:
+    image: bitnami/redis
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      REDIS_PORT_NUMBER: ${REDIS_PORT}
+    networks:
+      - backend
+
+volumes:
+  wordpress-data: {}
+  database-data: {}
+
+networks:
+  frontend: {}
+  backend: {}
